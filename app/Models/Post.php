@@ -8,30 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * Class Post
- * @package App\Model
- *
- * @property $title
- * @property $description
- * @property $slug
- * @property $domain
- * @property $likes
- * @property $category_id
- * @property $is_banned
- *
- *
- */
 class Post extends Model
 {
     use SoftDeletes, HasFactory;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * @var string[]
      */
     protected $fillable = [
+        'title',
+        'description',
+        'likes',
+        'is_published',
         'category_id',
     ];
 
@@ -40,14 +28,14 @@ class Post extends Model
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Post::class);
     }
 
     /**
      * @return BelongsToMany
      */
-    public function categories(): BelongsToMany
+    public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Tag::class);
     }
 }
