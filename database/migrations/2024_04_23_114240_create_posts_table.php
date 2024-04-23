@@ -9,11 +9,14 @@ return new class extends Migration {
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 100);
-            $table->text('text')->nullable();
+            $table->string('title');
+            $table->string('description')->nullable();
+            $table->unsignedBigInteger('category_id');
+            $table->integer('likes');
+            $table->boolean('is_published')->default(false);
+
             $table->softDeletes();
             $table->timestamps();
-            $table->timestamp('added_at');
         });
     }
 

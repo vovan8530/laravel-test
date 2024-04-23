@@ -11,6 +11,6 @@
 <body>
     {{$slot}}
 </body>
-<x-post :posts :message="$title" type="error" width="300" height="200"></x-post>
-<x-footer :footer/>
+{{--<x-post></x-post>--}}
+{{--<x-footer :footer/>--}}
 </html>

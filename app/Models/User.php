@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,17 +15,12 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * @property integer $id
  * @property string $name
- * @property int $age
- * @property int $salary
  * @property string $email
- *
- * @property City $city
- * @property Thumbnail $thumbnail
  *
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -37,9 +30,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'age',
-        'city_id',
-        'salary',
         'password',
     ];
 
@@ -61,26 +51,7 @@ class User extends Authenticatable
     protected $casts = [
         'name' => 'string',
         'email'=> 'string',
-        'age' => 'integer',
-        'city_id' => 'integer',
-        'salary' => 'float',
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    /**
-     * @return BelongsTo
-     */
-    public function city(): BelongsTo
-    {
-        return $this->belongsTo(City::class);
-    }
-
-    /**
-     * @return HasOne
-     */
-    public function thumbnail(): HasOne
-    {
-        return $this->hasOne(Thumbnail::class);
-    }
 }

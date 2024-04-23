@@ -2,21 +2,20 @@
 
 namespace Database\Factories;
 
-use App\Models\Country;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
-class CountryFactory extends Factory
+class TagFactory extends Factory
 {
-    protected $model = Country::class;
+    protected $model = Tag::class;
 
     public function definition(): array
     {
         return [
-            'name' => fake()->country,
+            'title' => $this->faker->word(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
-
         ];
     }
 }

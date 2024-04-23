@@ -14,6 +14,6 @@ class CategorySeeder extends Seeder
         Category::query()->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        Category::factory(5)->create();
+        Category::factory(10)->create();
     }
 }
