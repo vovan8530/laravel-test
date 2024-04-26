@@ -143,7 +143,7 @@ class PostApiService
     private function updateCategoryOrCreateNew($category): int
     {
         if (isset($category['id'])) {
-            $newCategory = Category::find($category['id']);
+            $newCategory = Category::findOrFail($category['id']);
             $newCategory->update($category);
             $category = $newCategory->fresh();
         } else {
@@ -163,7 +163,7 @@ class PostApiService
         $tagIds = [];
         foreach ($tags as $tag) {
             if (isset($tag['id'])) {
-                $newTag = Tag::find($tag['id']);
+                $newTag = Tag::findOrFail($tag['id']);
                 $newTag->update($tag);
                 $tag = $newTag->fresh();
                 $tagIds[] = $tag->id;
