@@ -4,10 +4,10 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * Class User
@@ -16,9 +16,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property integer $id
  * @property string $name
  * @property string $email
+ * @property int role
  *
  */
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -50,8 +52,19 @@ class User extends Authenticatable
      */
     protected $casts = [
         'name' => 'string',
-        'email'=> 'string',
+        'email' => 'string',
         'email_verified_at' => 'datetime',
+        'role' => 'integer',
         'password' => 'hashed',
     ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

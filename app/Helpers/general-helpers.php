@@ -1,6 +1,5 @@
 <?php
 
-
 use App\Helpers\ArrayHelper;
 
 if (!function_exists('resourceGet')) {

@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers\Post;
 
-use App\Http\Controllers\Controller;
-use App\Models\Post;
+use App\Http\Controllers\Admin\Post\BaseController;
+use App\Http\Requests\FilterRequest;
+use App\Http\Resources\PostResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\View\View;
 
-class IndexController extends Controller
+class IndexController extends BaseController
 {
-    public function __invoke()
+    /**
+     * @param  FilterRequest  $request
+     * @return View
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function __invoke(FilterRequest  $request): View
     {
-        $posts = Post::all();
+        $posts = $this->service->index($request);
+
+//        return PostResource::collection($posts);
+
         return view('posts.index', [
             'posts' => $posts
         ]);
-
     }
 }

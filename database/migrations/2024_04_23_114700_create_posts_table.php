@@ -11,7 +11,10 @@ return new class extends Migration {
             $table->id();
             $table->string('title');
             $table->string('description')->nullable();
+
             $table->unsignedBigInteger('category_id');
+            $table->foreign('category_id')->on('categories')->references('id');
+
             $table->integer('likes');
             $table->boolean('is_published')->default(false);
 
