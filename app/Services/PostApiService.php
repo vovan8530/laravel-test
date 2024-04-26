@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\Http\Filters\PostFilter;
 use App\Http\Requests\FilterRequest;
-use App\Http\Requests\PostRequest;
+use App\Http\Requests\PostApiRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use mysql_xdevapi\Exception;
+
 
 class PostApiService
 {
@@ -31,50 +32,73 @@ class PostApiService
     }
 
     /**
-     * @param  PostRequest  $request
-     * @return Post|string
+     * @param  PostApiRequest  $request
+     * @return Post|JsonResponse
      */
-    public function storePost(PostRequest $request): Post|string
+    public function storePost(PostApiRequest $request): Post|JsonResponse
     {
-
         try {
             DB::beginTransaction();
 
             $data = $request->validated();
-            $category = $data['category'] ?? null;
+            $category = $data['category'];
             $tags = $data['tags'];
 
             unset($data['category'], $data['tags']);
 
-            $data['category_id'] = $this->categoryId($category);
-            $tagIds = $this->tagIds($tags);
+            $categoryId = $this->getCategoryIdOrCreateNew($category);
+            $tagIds = $this->getTagIdsOrCreateNew($tags);
 
-            $post = Post::create($data);
-            $post->tags()->sync($tagIds);
+            $post = Post::create($this->postMergeCategoryId($data, $categoryId));
+            $post->tags()->attach($tagIds);
             DB::commit();
-        }catch (\Exception $exception){
-            DB::rollBack();
-            return $exception->getMessage();
-        }
 
-        return $post;
+            return $post;
+
+        } catch (\Exception $exception) {
+            DB::rollBack();
+
+            return response()->json(['error' => $exception->getMessage()], 500);
+        }
     }
 
     /**
-     * @param  PostRequest  $request
+     * @param  PostApiRequest  $request
      * @param  Post  $post
-     * @return Post
+     * @return Post|JsonResponse
      */
-    public function updatePost(PostRequest $request, Post $post): Post
+    public function updatePost(PostApiRequest $request, Post $post): Post|JsonResponse
     {
-        $tags = $request->tags;
-        $data = $request->replace($request->except('tags'))->toArray();
+        try {
+            DB::beginTransaction();
 
-        $post->update($data);
+            $data = $request->validated();
 
-        $post->tags()->sync($tags);
+            $category = $data['category'];
+            $tags = $data['tags'];
 
-        return $post;
+            unset($data['category'], $data['tags']);
+
+            $categoryId = $this->updateCategoryOrCreateNew($category);
+            $tagIds = $this->updateTagsOrCreateNew($tags);
+
+            if (!$post->exists()) {
+                throw new \Exception('Post does not exist.');
+            }
+
+            $post->update($this->postMergeCategoryId($data, $categoryId));
+
+            $post->tags()->sync($tagIds);
+
+            DB::commit();
+
+            return $post->fresh();
+
+        } catch (\Exception $exception) {
+            DB::rollBack();
+
+            return response()->json(['error' => $exception->getMessage()], 500);
+        }
     }
 
     /**
@@ -90,17 +114,17 @@ class PostApiService
      * @param $category
      * @return int
      */
-    private function categoryId($category): int
+    private function getCategoryIdOrCreateNew($category): int
     {
         $category = !isset($category['id']) ? Category::create($category) : Category::find($category['id']);
         return $category->id;
     }
 
     /**
-     * @param array $tags
+     * @param  array  $tags
      * @return array
      */
-    private function tagIds(array $tags): array
+    private function getTagIdsOrCreateNew(array $tags): array
     {
         $tagIds = [];
         foreach ($tags as $tag) {
@@ -108,5 +132,56 @@ class PostApiService
             $tagIds[] = $tag->id;
         }
         return $tagIds;
+    }
+
+
+    /**
+     * @param $category
+     * @return int
+     * @throws \Exception
+     */
+    private function updateCategoryOrCreateNew($category): int
+    {
+        if (isset($category['id'])) {
+            $newCategory = Category::find($category['id']);
+            $newCategory->update($category);
+            $category = $newCategory->fresh();
+        } else {
+            $category = Category::create($category);
+        }
+
+        return $category->id;
+    }
+
+    /**
+     * @param  array  $tags
+     * @return array
+     * @throws \Exception
+     */
+    private function updateTagsOrCreateNew(array $tags): array
+    {
+        $tagIds = [];
+        foreach ($tags as $tag) {
+            if (isset($tag['id'])) {
+                $newTag = Tag::find($tag['id']);
+                $newTag->update($tag);
+                $tag = $newTag->fresh();
+                $tagIds[] = $tag->id;
+            }else{
+                $tag = Tag::create($tag);
+                $tagIds[] = $tag->id;
+            }
+        }
+        return $tagIds;
+    }
+
+    /**
+     * @param $post
+     * @param $categoryId
+     * @return array
+     */
+    private function postMergeCategoryId($post, $categoryId): array
+    {
+        return array_merge($post, ['category_id' => $categoryId]);
     }
 }

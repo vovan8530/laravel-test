@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Model Tag
+ *
+ * @property int $id
+ * @property string $title
+ */
 class Tag extends Model
 {
     use SoftDeletes, HasFactory;

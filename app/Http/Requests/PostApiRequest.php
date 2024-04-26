@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PostRequest extends FormRequest
+class PostApiRequest extends FormRequest
 {
     public function rules(): array
     {
@@ -13,9 +13,11 @@ class PostRequest extends FormRequest
             'description' => 'string',
             'is_published' => 'boolean',
             'likes' => 'int|min:1',
-            'category_id' => 'required|int|exists:categories,id',
+            'category.id' => 'exists:categories,id|nullable',
+            'category.title' => 'string|nullable',
             'tags' => 'array',
-            'tags.*' => 'int|exists:tags,id'
+            'tags.*.id' => 'exists:categories,id|nullable',
+            'tags.*.title' => 'string|nullable',
         ];
     }
 

@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Api\Post\IndexController;
 use App\Http\Controllers\Api\Post\StoreController;
+use App\Http\Controllers\Api\Post\UpdateController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,9 +40,11 @@ Route::group([
 
 
 });
-Route::group(['middleware' => 'jwt.auth'], function () {
-    Route::post('/posts', StoreController::class);
-    Route::get('/posts', IndexController::class);
+
+Route::group(['prefix' => 'posts', 'middleware' => 'jwt.auth'], function () {
+    Route::patch('/{post}', UpdateController::class)->whereNumber('post');
+    Route::post('/', StoreController::class);
+    Route::get('/', IndexController::class);
 });
 
 
